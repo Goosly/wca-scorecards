@@ -1,0 +1,64 @@
+<div class="wrapper">
+  <div class="header center"> 
+    <h1>WCA Competition Scorecards</h1>
+  </div>
+  
+  <div class="content center">
+  <!-- LOGIN -->
+    <div *ngIf="! apiService.oauthToken">
+      <button class="login" (click)="handleLoginToWca()">First: login</button><br>
+    </div>
+
+  <!-- SELECT COMP -->
+    <div *ngIf="apiService.oauthToken && ! competitionId">
+      <p>Welcome!</p>
+      <p *ngIf="competitionsToChooseFrom">Select a competition:</p>
+      <p *ngFor="let competitionId of competitionsToChooseFrom">
+        <button class="competition" (click)="handleCompetitionSelected(competitionId)">{{competitionId}}</button>
+      </p>
+      <p *ngIf="!!competitionsToChooseFrom && competitionsToChooseFrom.length === 0">You don't have any competition available :-(</p>
+    </div>
+
+  <!-- INFORMATION ABOUT COMP AND PRINTING -->
+    <div *ngIf="competitionId && wcif && state === 'PRINT'">
+      <p> Selected competition: {{ competitionId }}<br><br>
+      {{ wcif.events?.length }} events found...&nbsp;&nbsp;<button (click)="handleRefreshCompetition()"
+        ><i class="fa fa-refresh"></i> Refresh results</button></p>
+      
+      <table class="center">
+      <tr *ngFor="let event of wcif.events">
+        <td>{{ nameOfEventId(event.id) }}</td>
+        <td><button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 0)"><i class="fa fa-download"></i> Round 1</button></td>
+        <td>
+          <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 1)"
+                  [disabled]="event.rounds[1]?.results.length > 0"
+                  *ngIf="event.rounds.length >= 2"><i class="fa fa-download"></i> Round 2</button>
+          </td>
+        <td>
+          <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 2)"
+                  [disabled]="event.rounds[2]?.results.length > 0"
+                  *ngIf="event.rounds.length >= 3"><i class="fa fa-download"></i> Round 3</button>
+        </td>
+        <td>
+          <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 3)"
+                  [disabled]="event.rounds[3]?.results.length > 0"
+                  *ngIf="event.rounds.length >= 4"><i class="fa fa-download"></i> Round 4</button>
+        </td>
+      </tr>
+      </table><br>
+      <!--<button (click)="state = 'EDIT'"><i class="fa fa-cog"></i> Customize</button><br><br>-->
+      <button (click)="handlePrintAllFirstRounds()"><i class="fa fa-download"></i> Scorecards for all first rounds</button>
+    </div>
+    
+  <!-- REFRESH -->
+    <div *ngIf="state === 'REFRESHING'">
+      <p>Refreshing...</p>
+    </div>
+    
+  <!-- CUSTOMIZE -->
+    <div *ngIf="competitionId && wcif && state === 'EDIT'">
+      <button (click)="state = 'PRINT'"><i class="fa fa-arrow-circle-left"></i> Go back to printing</button>
+    </div>
+    
+  </div>
+</div>
