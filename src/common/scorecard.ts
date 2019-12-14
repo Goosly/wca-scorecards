@@ -40,11 +40,11 @@ export class ScoreCardService {
   public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number) {
     let scorecards: ScoreCardInfo[] = [];
     let round: Round = event.rounds[roundNumber];
-    round.results.forEach(r => {
+    round.results.forEach((r, i) => {
       let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
-      scorecard.group = 1; // todo
+      scorecard.group = i < round.results.length / 2 ? 1 : 2; // todo split in more than 2 groups?
       scorecards.push(scorecard);
     });
     if (roundNumber === 0) {
@@ -61,7 +61,7 @@ export class ScoreCardService {
       eventName: getEventName(event.id),
       round: roundNumber + 1,
       group: 1, // todo
-      totalGroups: 1, // todo
+      totalGroups: roundNumber > 0 ? 2 : 1, // todo split in more than 2 groups?
       competitorId: null,
       competitorName: null,
       timeLimit: this.getTimeLimitOf(event.rounds[0]),
