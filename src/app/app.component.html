@@ -31,17 +31,17 @@
         <td><button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 0)"><i class="fa fa-download"></i> Round 1</button></td>
         <td>
           <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 1)"
-                  [disabled]="event.rounds[1]?.results.length > 0"
+                  [disabled]="event.rounds[1]?.results?.length === 0"
                   *ngIf="event.rounds.length >= 2"><i class="fa fa-download"></i> Round 2</button>
           </td>
         <td>
           <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 2)"
-                  [disabled]="event.rounds[2]?.results.length > 0"
+                  [disabled]="event.rounds[2]?.results?.length === 0"
                   *ngIf="event.rounds.length >= 3"><i class="fa fa-download"></i> Round 3</button>
         </td>
         <td>
           <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 3)"
-                  [disabled]="event.rounds[3]?.results.length > 0"
+                  [disabled]="event.rounds[3]?.results?.length === 0"
                   *ngIf="event.rounds.length >= 4"><i class="fa fa-download"></i> Round 4</button>
         </td>
       </tr>
