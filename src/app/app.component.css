@@ -55,3 +55,9 @@ textarea {
   width: 500px;
   height: 400px;
 }
+
+.info-center {
+  max-width: 600px;
+  text-align: center;
+  margin: auto;
+}

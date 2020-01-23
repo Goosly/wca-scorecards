@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {formatCentiseconds, Event, getEventName, Round, Person} from '@wca/helpers';
+import {Event, formatCentiseconds, getEventName, Person, Round} from '@wca/helpers';
 import {Helpers} from './helpers';
 import {Wcif} from './classes';
-import {ApiService} from './api';
+
 declare var pdfMake: any;
 
 @Injectable({
@@ -10,7 +10,7 @@ declare var pdfMake: any;
 })
 export class ScoreCardService {
 
-  constructor(public apiService: ApiService) {
+  constructor() {
   }
 
   public printScoreCardsForAllFirstRoundsExceptFMC(wcif: Wcif) {
@@ -45,6 +45,7 @@ export class ScoreCardService {
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
       scorecard.group = i < round.results.length / 2 ? 1 : 2; // todo split in more than 2 groups?
+      scorecard.totalGroups = 2; // todo split in more than 2 groups?
       scorecards.push(scorecard);
     });
     if (roundNumber === 0) {
@@ -60,8 +61,8 @@ export class ScoreCardService {
       competitionName: wcif.name,
       eventName: getEventName(event.id),
       round: roundNumber + 1,
-      group: 1, // todo
-      totalGroups: roundNumber > 0 ? 2 : 1, // todo split in more than 2 groups?
+      group: 1,
+      totalGroups: 1,
       competitorId: null,
       competitorName: null,
       timeLimit: this.getTimeLimitOf(event.rounds[0]),
@@ -115,7 +116,7 @@ export class ScoreCardService {
   private getEmptyScoreCard(wcif): ScoreCardInfo {
     return {
       eventId: ' ',
-      competitionName: wcif.id,
+      competitionName: wcif.name,
       eventName: ' ',
       round: null,
       group: null,
@@ -129,7 +130,11 @@ export class ScoreCardService {
   }
 
   private print(wcif: any, scorecards: ScoreCardInfo[]) {
-    pdfMake.createPdf(this.document(scorecards)).download('scorecards-' + wcif.id + '.pdf');
+    if (scorecards.length === 0) {
+      alert('Something went wrong: trying to print zero scorecards');
+    } else {
+      pdfMake.createPdf(this.document(scorecards)).download('scorecards-' + wcif.id + '.pdf');
+    }
   }
 
   private document(scorecards): any {
@@ -201,7 +206,7 @@ export class ScoreCardService {
             {text:'S', alignment: 'center'},
             {text:
                 info.cumulative ? 'Result\n(Cumulative limit: ' + info.timeLimit + ')' :
-                  (info.timeLimit !== null ? 'Result (DNF if > ' + info.timeLimit + ')' : ''), alignment: 'center'},
+                  (info.timeLimit !== null ? 'Result (DNF if ≥ ' + info.timeLimit + ')' : ''), alignment: 'center'},
             {text:'J', alignment: 'center'},
             {text:'C', alignment: 'center'}],
             [{text:'1', margin: [0, 7]}, '', '', '', '']]
@@ -242,7 +247,7 @@ export class ScoreCardService {
             {text:'S', alignment: 'center'},
             {text:
                 info.cumulative ? 'Result\n(Cumulative limit: ' + info.timeLimit + ')' :
-                  (info.timeLimit !== null ? 'Result (DNF if > ' + info.timeLimit + ')' : ''), alignment: 'center'},
+                  (info.timeLimit !== null ? 'Result (DNF if ≥ ' + info.timeLimit + ')' : ''), alignment: 'center'},
             {text:'J', alignment: 'center'},
             {text:'C', alignment: 'center'}],
             [{text:'1', margin: [0, 7]}, '', '', '', ''],

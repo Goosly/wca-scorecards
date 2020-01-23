@@ -24,6 +24,8 @@
       <p> Selected competition: {{ competitionId }}<br><br>
       {{ wcif.events?.length }} events found...&nbsp;&nbsp;<button (click)="handleRefreshCompetition()"
         ><i class="fa fa-refresh"></i> Refresh results</button></p>
+
+      <p class="info-center">When you've finished entering the results of a round in WCA Live, open the next round and 'Synchronize' in WCA Live. Then press 'Refresh results' here and the scorecards for the round you just opened will be available.</p><br>
       
       <table class="center">
       <tr *ngFor="let event of wcif.events">
