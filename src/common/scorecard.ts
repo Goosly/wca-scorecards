@@ -44,8 +44,8 @@ export class ScoreCardService {
       let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
-      scorecard.group = i < round.results.length / 2 ? 1 : 2; // todo split in more than 2 groups?
-      scorecard.totalGroups = 2; // todo split in more than 2 groups?
+      scorecard.group = roundNumber === 0 ? 1 : ( (i < (round.results.length / 2)) ? 1 : 2 ); // todo split in more than 2 groups?
+      scorecard.totalGroups = roundNumber === 0 ? 1 : 2; // todo split in more than 2 groups?
       scorecards.push(scorecard);
     });
     if (roundNumber === 0) {
