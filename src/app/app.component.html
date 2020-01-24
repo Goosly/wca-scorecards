@@ -26,11 +26,14 @@
         ><i class="fa fa-refresh"></i> Refresh results</button></p>
 
       <p class="info-center">When you've finished entering the results of a round in WCA Live, open the next round and 'Synchronize' in WCA Live. Then press 'Refresh results' here and the scorecards for the round you just opened will be available.</p><br>
+
+      <p class="info-center">First rounds are sorted alphabetically (note that you should rather be using a grouping tool for first rounds). Other rounds are always sorted by ranking of the previous round and split in 2 groups.</p><br>
       
       <table class="center">
       <tr *ngFor="let event of wcif.events">
         <td>{{ nameOfEventId(event.id) }}</td>
-        <td><button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 0)"><i class="fa fa-download"></i> Round 1</button></td>
+        <td><button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 0)"
+                    [disabled]="event.rounds[0]?.results?.length === 0"><i class="fa fa-download"></i> Round 1</button></td>
         <td>
           <button (click)="scoreCardService.printScoreCardsForRound(wcif, event, 1)"
                   [disabled]="event.rounds[1]?.results?.length === 0"

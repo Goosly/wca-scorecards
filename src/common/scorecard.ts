@@ -44,8 +44,11 @@ export class ScoreCardService {
       let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
-      scorecard.group = roundNumber === 0 ? 1 : ( (i < (round.results.length / 2)) ? 1 : 2 ); // todo split in more than 2 groups?
-      scorecard.totalGroups = roundNumber === 0 ? 1 : 2; // todo split in more than 2 groups?
+      if (roundNumber !== 0) {
+        scorecard.group = i < (round.results.length / 2) ? 1 : 2; // todo split in more than 2 groups?
+        scorecard.totalGroups = 2; // todo split in more than 2 groups?
+        scorecard.ranking = i + 1;
+      }
       scorecards.push(scorecard);
     });
     if (roundNumber === 0) {
@@ -67,7 +70,8 @@ export class ScoreCardService {
       competitorName: null,
       timeLimit: this.getTimeLimitOf(event.rounds[0]),
       cumulative: this.getCumulative(event.rounds[0]),
-      cutoff: this.getCutoffOf(event.rounds[0])
+      cutoff: this.getCutoffOf(event.rounds[0]),
+      ranking: null
     }
   }
 
@@ -109,7 +113,8 @@ export class ScoreCardService {
       competitorName: 'Manu Vereecken',
       timeLimit: formatCentiseconds(5 * 6000),
       cumulative: false,
-      cutoff: formatCentiseconds(3 * 6000)
+      cutoff: formatCentiseconds(3 * 6000),
+      ranking: null
     }
   }
 
@@ -125,7 +130,8 @@ export class ScoreCardService {
       competitorName: ' ',
       timeLimit: null,
       cumulative: false,
-      cutoff: null
+      cutoff: null,
+      ranking: null
     }
   }
 
@@ -191,7 +197,8 @@ export class ScoreCardService {
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
       {text: 'Round ' + (info.round === null ? '    ' : info.round)
           + ' | Group ' + (info.group === null ? '    ' : info.group)
-          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups), alignment: 'center', fontSize: 10},
+          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups)
+          + (info.ranking === null ? '' : ' | Place: ' + info.ranking), alignment: 'center', fontSize: 10},
       {table : {
           widths: [30, 215],
           body: [[
@@ -232,7 +239,8 @@ export class ScoreCardService {
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
       {text: 'Round ' + (info.round === null ? '    ' : info.round)
           + ' | Group ' + (info.group === null ? '    ' : info.group)
-          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups), alignment: 'center', fontSize: 10},
+          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups)
+          + (info.ranking === null ? '' : ' | Place: ' + info.ranking), alignment: 'center', fontSize: 10},
       {table : {
           widths: [30, 215],
           body: [[
@@ -275,7 +283,8 @@ export class ScoreCardService {
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
       {text: 'Round ' + (info.round === null ? '    ' : info.round)
           + ' | Group ' + (info.group === null ? '    ' : info.group)
-          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups), alignment: 'center', fontSize: 10},
+          + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups)
+          + (info.ranking === null ? '' : ' | Place: ' + info.ranking), alignment: 'center', fontSize: 10},
       {table : {
           widths: [30, 215],
           body: [[
@@ -322,5 +331,5 @@ export class ScoreCardInfo {
   timeLimit: string;
   cumulative: boolean;
   cutoff: string;
+  ranking: number;
 }
-
