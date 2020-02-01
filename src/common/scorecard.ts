@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Event, formatCentiseconds, getEventName, Person, Round} from '@wca/helpers';
+import {Event, formatCentiseconds, getEventName, Person, Result, Round} from '@wca/helpers';
 import {Helpers} from './helpers';
 import {Wcif} from './classes';
 
@@ -40,6 +40,10 @@ export class ScoreCardService {
   public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number) {
     let scorecards: ScoreCardInfo[] = [];
     let round: Round = event.rounds[roundNumber];
+    if (roundNumber !== 0) {
+      this.enrichWithRankingFromPreviousRound(round.results, roundNumber - 1, wcif, event);
+      this.sortByRankingFromPreviousRound(round.results);
+    }
     round.results.forEach((r, i) => {
       let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
@@ -56,6 +60,16 @@ export class ScoreCardService {
     }
     this.addEmptyScoreCardsUntilPageIsFull(scorecards, wcif);
     this.print(wcif, scorecards);
+  }
+
+  private enrichWithRankingFromPreviousRound(results: Result[], previousRoundNumber: number, wcif: Wcif, event: Event) {
+    results.forEach((r: Result) => {
+      r['rankingPreviousRound'] = event.rounds[previousRoundNumber].results.filter(pr => pr.personId === r.personId)[0].ranking;
+    });
+  }
+
+  private sortByRankingFromPreviousRound(results: Result[]) {
+    results.sort((a, b) => a['rankingPreviousRound'] - b['rankingPreviousRound']);
   }
 
   private getScoreCardForEvent(wcif: any, event: Event, roundNumber: number): ScoreCardInfo {
