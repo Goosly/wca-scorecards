@@ -26,7 +26,8 @@ export class Helpers {
   }
 
   public static nameOfCompetitor(wcif:Wcif, registrantId: number) {
-    return wcif.persons.filter(p => p.registrantId === registrantId)[0].name;
+    const filter = wcif.persons.filter(p => p.registrantId === registrantId);
+    return filter.length === 1 ? filter[0].name : '';
   }
 
 }

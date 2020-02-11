@@ -45,7 +45,7 @@ export class ApiService {
 
   getWcif(competitionId): Observable<any> {
     if (environment.testMode) {
-      return this.httpClient.get(`https://www.worldcubeassociation.org/api/v0/competitions/DutchMasters2020/wcif/public`,
+      return this.httpClient.get(`https://www.worldcubeassociation.org/api/v0/competitions/AnnuntiaOpen2020/wcif/public`,
         {headers: this.headerParams});
     }
 

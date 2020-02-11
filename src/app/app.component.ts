@@ -12,12 +12,12 @@ declare var $ :any;
 })
 export class AppComponent  {
   state: 'PRINT' | 'EDIT' | 'REFRESHING' = 'PRINT';
-  
+
   // Info about competitions managed by user
   competitionsToChooseFrom: Array<String> = null;
   competitionId: string;
   wcif: any;
-  
+
   constructor (
           public apiService: ApiService,
           public scoreCardService: ScoreCardService) {
@@ -43,7 +43,7 @@ export class AppComponent  {
     this.competitionId = competitionId;
     this.loadWcif();
   }
-  
+
   handleRefreshCompetition() {
     this.state = 'REFRESHING';
     this.loadWcif();
@@ -56,24 +56,17 @@ export class AppComponent  {
   nameOfEventId(id) {
     return getEventName(id);
   }
-  
+
   private loadWcif() {
     this.apiService.getWcif(this.competitionId).subscribe(wcif => {
       this.wcif = wcif;
       try {
         this.wcif.events = this.wcif.events.filter(e => e.id !== '333fm');
 
-        let idsToRemove = [];
         this.wcif.persons.forEach(p => {
           p.fullName = p.name;
           p.name = p.name.split('(')[0];
-
-          if (!p.registration || p.registration.status !== 'accepted') {
-            idsToRemove.push(p.registrantId);
-          }
         });
-
-        this.wcif.persons = this.wcif.persons.filter(p => idsToRemove.indexOf(p.registrantId) === -1);
 
         this.state = 'PRINT';
       } catch (error) {
@@ -84,7 +77,7 @@ export class AppComponent  {
       }
     });
   }
-  
+
     // let event: Event = this.events.filter(e => e.id === eventId)[0];
     // let results: Result[] = event.rounds[event.rounds.length - 1].results;
     // return results.filter(r => r['best'] > 0);
