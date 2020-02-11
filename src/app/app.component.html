@@ -1,8 +1,8 @@
 <div class="wrapper">
-  <div class="header center"> 
+  <div class="header center">
     <h1>WCA Competition Scorecards</h1>
   </div>
-  
+
   <div class="content center">
   <!-- LOGIN -->
     <div *ngIf="! apiService.oauthToken">
@@ -28,7 +28,7 @@
       <p class="info-center">When you've finished entering the results of a round in WCA Live, open the next round and 'Synchronize' in WCA Live. Then press 'Refresh results' here and the scorecards for the round you just opened will be available.</p><br>
 
       <p class="info-center">First rounds are sorted alphabetically (note that you should rather be using a grouping tool for first rounds). Other rounds are always sorted by ranking of the previous round and split in 2 groups.</p><br>
-      
+
       <table class="center">
       <tr *ngFor="let event of wcif.events">
         <td>{{ nameOfEventId(event.id) }}</td>
@@ -52,18 +52,19 @@
       </tr>
       </table><br>
       <!--<button (click)="state = 'EDIT'"><i class="fa fa-cog"></i> Customize</button><br><br>-->
-      <button (click)="handlePrintAllFirstRounds()"><i class="fa fa-download"></i> Scorecards for all first rounds</button>
+      <!--<button (click)="handlePrintAllFirstRounds()"><i class="fa fa-download"></i> Scorecards for all first rounds</button>-->
+      <button (click)="scoreCardService.printFourEmptyScorecards(wcif)"><i class="fa fa-download"></i> Empty scorecards</button>
     </div>
-    
+
   <!-- REFRESH -->
     <div *ngIf="state === 'REFRESHING'">
       <p>Refreshing...</p>
     </div>
-    
+
   <!-- CUSTOMIZE -->
     <div *ngIf="competitionId && wcif && state === 'EDIT'">
       <button (click)="state = 'PRINT'"><i class="fa fa-arrow-circle-left"></i> Go back to printing</button>
     </div>
-    
+
   </div>
 </div>
