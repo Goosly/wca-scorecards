@@ -50,7 +50,7 @@ export class ScoreCardService {
       if (roundNumber !== 0) {
         scorecard.group = i < (round.results.length / 2) ? 1 : 2; // todo split in more than 2 groups?
         scorecard.totalGroups = 2; // todo split in more than 2 groups?
-        scorecard.ranking = i + 1;
+        scorecard.ranking = r['rankingPreviousRound'];
       }
       scorecards.push(scorecard);
     });
