@@ -81,9 +81,9 @@ export class ScoreCardService {
       totalGroups: 1,
       competitorId: null,
       competitorName: null,
-      timeLimit: this.getTimeLimitOf(event.rounds[0]),
-      cumulative: this.getCumulative(event.rounds[0]),
-      cutoff: this.getCutoffOf(event.rounds[0]),
+      timeLimit: this.getTimeLimitOf(event.rounds[roundNumber]),
+      cumulative: this.getCumulative(event.rounds[roundNumber]),
+      cutoff: this.getCutoffOf(event.rounds[roundNumber]),
       ranking: null
     }
   }
