@@ -51,8 +51,6 @@
         </td>
       </tr>
       </table><br>
-      <!--<button (click)="state = 'EDIT'"><i class="fa fa-cog"></i> Customize</button><br><br>-->
-      <!--<button (click)="handlePrintAllFirstRounds()"><i class="fa fa-download"></i> Scorecards for all first rounds</button>-->
       <button (click)="scoreCardService.printFourEmptyScorecards(wcif)"><i class="fa fa-download"></i> Empty scorecards</button>
     </div>
 
@@ -60,12 +58,6 @@
     <div *ngIf="state === 'REFRESHING'">
       <p>Refreshing...</p>
     </div>
-
-  <!-- CUSTOMIZE -->
-    <div *ngIf="competitionId && wcif && state === 'EDIT'">
-      <button (click)="state = 'PRINT'"><i class="fa fa-arrow-circle-left"></i> Go back to printing</button>
-    </div>
-
   </div>
 
   <div class="footer left">
