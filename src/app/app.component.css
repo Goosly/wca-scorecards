@@ -29,6 +29,11 @@ html, body {
   margin: auto;
 }
 
+.left {
+  text-align: left;
+  margin: auto;
+}
+
 .login {
   font-size: 25px;
 }
