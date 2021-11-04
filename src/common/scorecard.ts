@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Event, formatCentiseconds, getEventName, Person, Result, Round} from '@wca/helpers';
 import {Helpers} from './helpers';
-import {Wcif} from './classes';
+import {GeneralConfiguration, Wcif} from './classes';
 
 declare var pdfMake: any;
 
@@ -36,7 +36,7 @@ export class ScoreCardService {
     }
   }
 
-  public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number) {
+  public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number, config: GeneralConfiguration) {
     let scorecards: ScoreCardInfo[] = [];
     let round: Round = event.rounds[roundNumber];
     if (roundNumber !== 0) {
@@ -48,8 +48,8 @@ export class ScoreCardService {
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
       if (roundNumber !== 0) {
-        scorecard.group = i < (round.results.length / 2) ? 1 : 2; // todo split in more than 2 groups?
-        scorecard.totalGroups = 2; // todo split in more than 2 groups?
+        scorecard.group = Math.floor(i*config.numberOfGroups/round.results.length) + 1;
+        scorecard.totalGroups = config.numberOfGroups;
         scorecard.ranking = r['rankingPreviousRound'];
       }
       scorecards.push(scorecard);
@@ -57,8 +57,25 @@ export class ScoreCardService {
     if (roundNumber === 0) {
       scorecards = this.sortScoreCardsByName(scorecards);
     }
+    if (config.printStationNumbers) {
+      this.enrichWithStationNumbers(scorecards);
+    }
     this.addEmptyScoreCardsUntilPageIsFull(scorecards, wcif);
     this.print(wcif, scorecards);
+  }
+
+  private enrichWithStationNumbers(scorecardsForEvent: ScoreCardInfo[]) {
+    let stationCounter = 0;
+    let group = scorecardsForEvent[0].group;
+    scorecardsForEvent.forEach((s: ScoreCardInfo, i: number) => {
+      if (s.group == group) {
+        stationCounter++;
+      } else {
+        stationCounter = 1;
+        group++;
+      }
+      s.timerStationId = stationCounter;
+    });
   }
 
   private enrichWithRankingFromPreviousRound(results: Result[], previousRoundNumber: number, wcif: Wcif, event: Event) {
@@ -84,7 +101,8 @@ export class ScoreCardService {
       timeLimit: this.getTimeLimitOf(event.rounds[roundNumber]),
       cumulative: this.getCumulative(event.rounds[roundNumber]),
       cutoff: this.getCutoffOf(event.rounds[roundNumber]),
-      ranking: null
+      ranking: null,
+      timerStationId: null
     }
   }
 
@@ -114,23 +132,6 @@ export class ScoreCardService {
     }
   }
 
-  private getFakeScoreCard(): ScoreCardInfo {
-    return {
-      eventId: '333',
-      competitionName: 'Belgian Open 2020',
-      eventName: '3x3x3 Cube',
-      round: 1,
-      group: 2,
-      totalGroups: 4,
-      competitorId: 15,
-      competitorName: 'Manu Vereecken',
-      timeLimit: formatCentiseconds(5 * 6000),
-      cumulative: false,
-      cutoff: formatCentiseconds(3 * 6000),
-      ranking: null
-    }
-  }
-
   public printFourEmptyScorecards(wcif: Wcif) {
     let scorecards: ScoreCardInfo[] = [
       this.getEmptyScoreCard(wcif),
@@ -154,7 +155,8 @@ export class ScoreCardService {
       timeLimit: null,
       cumulative: false,
       cutoff: null,
-      ranking: null
+      ranking: null,
+      timerStationId: null,
     }
   }
 
@@ -232,9 +234,12 @@ export class ScoreCardService {
 
   private oneMo3ScoreCard(info: ScoreCardInfo): any[]  {
     return [
-      {text: info.competitionName, alignment: 'center', fontSize: 10},
+      [
+        {text: ! info.timerStationId ? '' : 'Timer ' + info.timerStationId, alignment: 'right', fontSize: 9},
+        {text: info.competitionName, alignment: 'center', fontSize: 10}
+      ],
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
-      (this.roundGroupAndPlaceInfo(info)),
+      (this.roundGroupAndRankingInfo(info)),
       {table : {
           widths: [30, this.SCORE_CARD_RESULT_WIDTH + 58],
           body: [[
@@ -272,9 +277,12 @@ export class ScoreCardService {
 
   private oneAvg5ScoreCard(info: ScoreCardInfo): any[]  {
     return [
-      {text: info.competitionName, alignment: 'center', fontSize: 10},
+      [
+        {text: ! info.timerStationId ? '' : 'Timer ' + info.timerStationId, alignment: 'right', fontSize: 9},
+        {text: info.competitionName, alignment: 'center', fontSize: 10}
+      ],
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
-      (this.roundGroupAndPlaceInfo(info)),
+      (this.roundGroupAndRankingInfo(info)),
       {table : {
           widths: [30, this.SCORE_CARD_RESULT_WIDTH + 58],
           body: [[
@@ -314,9 +322,12 @@ export class ScoreCardService {
 
   private oneMbldScoreCard(info: ScoreCardInfo): any[]  {
     return [
-      {text: info.competitionName, alignment: 'center', fontSize: 10},
+      [
+        {text: ! info.timerStationId ? '' : 'Timer ' + info.timerStationId, alignment: 'right', fontSize: 9},
+        {text: info.competitionName, alignment: 'center', fontSize: 10}
+      ],
       {text: info.eventName, alignment: 'center', fontSize: 18, bold: true},
-      (this.roundGroupAndPlaceInfo(info)),
+      (this.roundGroupAndRankingInfo(info)),
       {table : {
           widths: [30, this.SCORE_CARD_RESULT_WIDTH + 58],
           body: [[
@@ -342,12 +353,12 @@ export class ScoreCardService {
     ]
   }
 
-  private roundGroupAndPlaceInfo(info: ScoreCardInfo) {
+  private roundGroupAndRankingInfo(info: ScoreCardInfo) {
     return {
       text: 'Round ' + (info.round === null ? '    ' : info.round)
         + ' | Group ' + (info.group === null ? '    ' : info.group)
         + ' of ' + (info.totalGroups === null ? '    ' : info.totalGroups)
-        + (info.ranking === null ? '' : ' | Place: ' + info.ranking), alignment: 'center', fontSize: 10
+        + (info.ranking === null ? '' : ' | Ranking: ' + info.ranking), alignment: 'center', fontSize: 10
     };
   }
 
@@ -373,4 +384,5 @@ export class ScoreCardInfo {
   cumulative: boolean;
   cutoff: string;
   ranking: number;
+  timerStationId: number;
 }

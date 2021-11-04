@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ApiService } from '../common/api';
-import { Event } from '@wca/helpers/lib/models/event';
 import { ScoreCardService } from '../common/scorecard';
 import {getEventName} from '@wca/helpers';
+import {GeneralConfiguration} from '../common/classes';
 declare var $ :any;
 
 @Component({
@@ -13,9 +13,9 @@ declare var $ :any;
 export class AppComponent  {
   state: 'PRINT' | 'REFRESHING' = 'PRINT';
 
-  // Info about competitions managed by user
   competitionsToChooseFrom: Array<String> = null;
   competitionId: string;
+  config = new GeneralConfiguration();
   wcif: any;
 
   constructor (

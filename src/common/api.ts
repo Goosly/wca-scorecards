@@ -11,7 +11,7 @@ export class ApiService {
   public oauthToken;
   private headerParams: HttpHeaders;
 
-  private ONE_YEAR = 365;
+  private THREE_YEARS = 365 * 3;
   private FOUR_WEEKS = 28;
 
   constructor(private httpClient: HttpClient) {
@@ -38,7 +38,7 @@ export class ApiService {
   getCompetitions(): Observable<any> {
     let url = `${environment.wcaUrl}/api/v0/competitions?managed_by_me=true`;
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - (environment.testMode ? this.ONE_YEAR : this.FOUR_WEEKS));
+    startDate.setDate(startDate.getDate() - (environment.testMode ? this.THREE_YEARS : this.FOUR_WEEKS));
     url += `&start=${startDate.toISOString()}`;
     return this.httpClient.get(url, {headers: this.headerParams});
   }
