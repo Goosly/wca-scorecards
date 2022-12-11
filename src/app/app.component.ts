@@ -3,7 +3,6 @@ import { ApiService } from '../common/api';
 import { ScoreCardService } from '../common/scorecard';
 import {getEventName} from '@wca/helpers';
 import {GeneralConfiguration} from '../common/classes';
-declare var $ :any;
 
 @Component({
   selector: 'my-app',
@@ -49,10 +48,6 @@ export class AppComponent  {
     this.loadWcif();
   }
 
-  handlePrintAllFirstRounds() {
-    // todo
-  }
-
   nameOfEventId(id) {
     return getEventName(id);
   }
@@ -77,9 +72,5 @@ export class AppComponent  {
       }
     });
   }
-
-    // let event: Event = this.events.filter(e => e.id === eventId)[0];
-    // let results: Result[] = event.rounds[event.rounds.length - 1].results;
-    // return results.filter(r => r['best'] > 0);
 
 }
