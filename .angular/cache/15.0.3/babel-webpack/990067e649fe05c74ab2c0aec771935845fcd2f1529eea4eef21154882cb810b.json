@@ -1,1 +1,0 @@
-{"ast":null,"code":"export var environment = {\n  appUrl: 'http://localhost:4200/',\n  wcaUrl: 'https://staging.worldcubeassociation.org',\n  wcaLiveUrl: 'https://live.worldcubeassociation.org',\n  wcaAppId: 'example-application-id',\n  wcaSecret: 'example-secret',\n  testMode: true\n};","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}
