@@ -12,8 +12,9 @@ export class ScoreCardService {
 
   private readonly SCORE_CARD_RESULT_WIDTH = 145;
 
-  private addEmptyScoreCardsUntilPageIsFull(scorecards: ScoreCardInfo[], wcif: any) {
-    while ((scorecards.length + 1) % 4 !== 0) {
+  private addEmptyScoreCardsUntilPageIsFull(scorecards: ScoreCardInfo[], roundNumber: number, wcif: any) {
+    const incrementWith = roundNumber === 0 ? 0 : 1;
+    while ((scorecards.length + incrementWith) % 4 !== 0) {
       scorecards.push(this.getEmptyScoreCard(wcif));
     }
   }
@@ -42,8 +43,8 @@ export class ScoreCardService {
     if (config.printStationNumbers) {
       this.enrichWithStationNumbers(scorecards);
     }
-    this.addEmptyScoreCardsUntilPageIsFull(scorecards, wcif);
-    this.print(wcif, scorecards);
+    this.addEmptyScoreCardsUntilPageIsFull(scorecards, roundNumber, wcif);
+    this.print(wcif, scorecards, roundNumber !== 0);
   }
 
   private enrichWithStationNumbers(scorecardsForEvent: ScoreCardInfo[]) {
@@ -121,7 +122,7 @@ export class ScoreCardService {
       this.getEmptyScoreCard(wcif),
       this.getEmptyScoreCard(wcif)
     ];
-    pdfMake.createPdf(this.document(scorecards)).download('emptyScorecards-' + wcif.id + '.pdf');
+    pdfMake.createPdf(this.document(scorecards, false)).download('emptyScorecards-' + wcif.id + '.pdf');
   }
 
   private getEmptyScoreCard(wcif): ScoreCardInfo {
@@ -142,15 +143,15 @@ export class ScoreCardService {
     }
   }
 
-  private print(wcif: any, scorecards: ScoreCardInfo[]) {
+  private print(wcif: any, scorecards: ScoreCardInfo[], withSummary: boolean) {
     if (scorecards.length === 0) {
       alert('Something went wrong: trying to print zero scorecards');
     } else {
-      pdfMake.createPdf(this.document(scorecards)).download('scorecards-' + wcif.id + '.pdf');
+      pdfMake.createPdf(this.document(scorecards, withSummary)).download('scorecards-' + wcif.id + '.pdf');
     }
   }
 
-  private document(scorecards): any {
+  private document(scorecards, withSummary: boolean): any {
     let document = {
       content: [
 
@@ -161,7 +162,7 @@ export class ScoreCardService {
         fontSize: 12
       }
     };
-    for (let i = -1; i < scorecards.length; i += 4) {
+    for (let i = withSummary ? -1 : 0; i < scorecards.length; i += 4) {
       let onePage = [
         [
           {stack: i === -1 ? this.getSummary(scorecards) : this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
@@ -354,7 +355,6 @@ export class ScoreCardService {
 
   private getSummary(scorecards: ScoreCardInfo[]) {
     const groups = new Set(scorecards.map(s => s.group));
-    console.log('groups: ' + groups);
 
     let list = '';
     groups.forEach(group => {
