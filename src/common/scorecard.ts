@@ -12,43 +12,25 @@ export class ScoreCardService {
 
   private readonly SCORE_CARD_RESULT_WIDTH = 145;
 
-  public printScoreCardsForAllFirstRoundsExceptFMC(wcif: Wcif) {
-    let scorecards: ScoreCardInfo[] = [];
-    wcif['events'].filter(e => e.id !== '333fm').forEach(event => {
-      Helpers.sortCompetitorsByEvent(wcif, event.id);
-      let competitorsOfEvent: Person[] = wcif.persons.filter(p => p[event.id].competing && !! p[event.id].group);
-      competitorsOfEvent.forEach(c => {
-        let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, 0);
-        scorecard.competitorName = c.name;
-        scorecard.competitorId = c.registrantId;
-        scorecard.group = c[event.id].group.split(";")[0];
-        scorecards.push(scorecard);
-      });
-      this.addEmptyScoreCardsUntilPageIsFull(scorecards, wcif);
-    });
-
-    this.print(wcif, scorecards);
-  }
-
   private addEmptyScoreCardsUntilPageIsFull(scorecards: ScoreCardInfo[], wcif: any) {
-    while (scorecards.length % 4 !== 0) {
+    while ((scorecards.length + 1) % 4 !== 0) {
       scorecards.push(this.getEmptyScoreCard(wcif));
     }
   }
 
   public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number, config: GeneralConfiguration) {
     let scorecards: ScoreCardInfo[] = [];
-    let round: Round = event.rounds[roundNumber];
+    const round: Round = event.rounds[roundNumber];
     if (roundNumber !== 0) {
       this.enrichWithRankingFromPreviousRound(round.results, roundNumber - 1, wcif, event);
       this.sortByRankingFromPreviousRound(round.results);
     }
     round.results.forEach((r, i) => {
-      let scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
+      const scorecard: ScoreCardInfo = this.getScoreCardForEvent(wcif, event, roundNumber);
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
       if (roundNumber !== 0) {
-        scorecard.group = Math.floor(i*config.numberOfGroups/round.results.length) + 1;
+        scorecard.group = Math.floor(i * config.numberOfGroups / round.results.length) + 1;
         scorecard.totalGroups = config.numberOfGroups;
         scorecard.ranking = r['rankingPreviousRound'];
       }
@@ -179,10 +161,10 @@ export class ScoreCardService {
         fontSize: 12
       }
     };
-    for (let i = 0; i < scorecards.length; i += 4) {
+    for (let i = -1; i < scorecards.length; i += 4) {
       let onePage = [
         [
-          {stack: this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
+          {stack: i === -1 ? this.getSummary(scorecards) : this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
           {text: '', border: [false, false, false, false]},
           {text: '', border: [true, false, false, false]},
           {stack: this.getScoreCardTemplate(scorecards[i + 1]), border: [false, false, false, false]}
@@ -364,10 +346,28 @@ export class ScoreCardService {
 
   private sortScoreCardsByName(scorecards: ScoreCardInfo[]) {
     return scorecards.sort(function(a, b) {
-      var textA = a.competitorName.toUpperCase();
-      var textB = b.competitorName.toUpperCase();
+      const textA = a.competitorName.toUpperCase();
+      const textB = b.competitorName.toUpperCase();
       return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     });
+  }
+
+  private getSummary(scorecards: ScoreCardInfo[]) {
+    const groups = new Set(scorecards.map(s => s.group));
+    console.log('groups: ' + groups);
+
+    let list = '';
+    groups.forEach(group => {
+      if (!!group) {
+        const lowestRanking = Math.min(...scorecards.filter(s => s.group === group).map(s => s.ranking));
+        const highestRanking = Math.max(...scorecards.filter(s => s.group === group).map(s => s.ranking));
+        list += `Group ${group}: ranking ${lowestRanking} to ${highestRanking}\n`;
+      }
+    });
+
+    return [{
+      text: 'Give this summary to the announcer, so they can clearly announce the groups to the competitors\n\n' + list
+    }];
   }
 }
 
