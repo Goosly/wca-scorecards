@@ -1,4 +1,3 @@
-rm -r dist/*
 
 ng build -c=production
 mv dist/demo/* dist/
