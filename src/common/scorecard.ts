@@ -354,6 +354,8 @@ export class ScoreCardService {
   }
 
   private getSummary(scorecards: ScoreCardInfo[]) {
+    const eventName = scorecards[0]?.eventName;
+    const round = scorecards[0]?.round;
     const groups = new Set(scorecards.map(s => s.group));
 
     let list = '';
@@ -366,7 +368,7 @@ export class ScoreCardService {
     });
 
     return [{
-      text: 'Give this summary to the announcer, so they can clearly announce the groups to the competitors\n\n' + list
+      text: `${eventName}, round ${round}\n\nGive this summary to the announcer, so they can clearly announce the groups to the competitors\n\n` + list
     }];
   }
 }
