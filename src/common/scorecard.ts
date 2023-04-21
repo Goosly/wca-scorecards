@@ -359,7 +359,7 @@ export class ScoreCardService {
     const groups = new Set(scorecards.map(s => s.group));
 
     let list = '';
-    groups.forEach(group => {
+    [...groups].sort().reverse().forEach(group => {
       if (!!group) {
         const lowestRanking = Math.min(...scorecards.filter(s => s.group === group).map(s => s.ranking));
         const highestRanking = Math.max(...scorecards.filter(s => s.group === group).map(s => s.ranking));
@@ -367,9 +367,17 @@ export class ScoreCardService {
       }
     });
 
-    return [{
-      text: `${eventName}, round ${round}\n\nGive this summary to the announcer, so they can clearly announce the groups to the competitors\n\n` + list
-    }];
+    return [
+      {
+        text: `${eventName}, round ${round}`, alignment: 'center', fontSize: 15
+      },
+      {
+        text: ` `
+      },
+      {
+        text: `Give this summary to the announcer, so they can clearly announce the groups to the competitors\n\n` + list
+      }
+    ];
   }
 }
 
