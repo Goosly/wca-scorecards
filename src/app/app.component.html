@@ -25,12 +25,14 @@
       {{ wcif.events?.length }} events found...&nbsp;&nbsp;<button (click)="handleRefreshCompetition()"
         ><i class="fa fa-refresh"></i> Refresh results</button></p>
 
-      <p class="info-center">When you've finished entering the results of a round in WCA Live, open the next round and 'Synchronize' in WCA Live. Then click 'Refresh results' here and the scorecards for the round you just opened will be available.</p><br>
-      <p class="info-center">First rounds are sorted alphabetically (note that you should rather be using a grouping tool for first rounds).</p>
+      <p class="info-center"><b>Please read the instructions carefully:</b></p><br>
+      <p class="info-center">After you've finished entering the results of a round in WCA Live, open the next round and 'Synchronize' in WCA Live. Then click 'Refresh results' here and the scorecards for the round you just opened will be available.</p><br>
+      <p class="info-center">First rounds are sorted alphabetically and have only 1 group (note that you should rather be using a grouping tool for first rounds).</p>
       <p class="info-center">For other rounds, competitors are always sorted by their ranking in the previous round.</p><br>
 
-      <p class="info-center">Split competitors into <input type="number" [(ngModel)]="config.numberOfGroups" min="1" step="1"> groups</p>
-      <p class="info-center"><input type="checkbox" [(ngModel)]="config.printStationNumbers" min="1" step="1"> Print station numbers for fixed seating</p><br>
+      <p class="info-center"><b>Options:</b></p>
+      <p class="info-center">Split competitors into <input type="number" [(ngModel)]="config.numberOfGroups" min="1" step="1"> groups (this does not apply to first rounds)</p>
+      <p class="info-center"><input type="checkbox" [(ngModel)]="config.printStationNumbers"> Print station numbers for fixed seating</p><br>
 
       <table class="center">
       <tr *ngFor="let event of wcif.events">
