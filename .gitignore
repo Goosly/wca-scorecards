@@ -32,14 +32,10 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-/.angular/
+/.angular/cache
 
 # System Files
 .DS_Store
 Thumbs.db
 
-# Angular
-.angular/cache/
-/.angular/cache
-/.angular/
 /dist/
