@@ -40,3 +40,6 @@ Thumbs.db
 
 # Angular
 .angular/cache/
+/.angular/cache
+/.angular/
+/dist/
