@@ -31,7 +31,7 @@ export class ScoreCardService {
       scorecard.competitorName = Helpers.nameOfCompetitor(wcif, r.personId);
       scorecard.competitorId = r.personId;
       if (roundNumber !== 0) {
-        scorecard.group = Math.floor(i * config.numberOfGroups / round.results.length) + 1;
+        scorecard.group = config.numberOfGroups - Math.floor(i * config.numberOfGroups / round.results.length);
         scorecard.totalGroups = config.numberOfGroups;
         scorecard.ranking = r['rankingPreviousRound'];
       }
@@ -396,7 +396,7 @@ export class ScoreCardService {
     const groups = new Set(scorecards.map(s => s.group));
 
     let list = '';
-    [...groups].sort().reverse().forEach(group => {
+    [...groups].sort().forEach(group => {
       if (!!group) {
         const lowestRanking = Math.min(...scorecards.filter(s => s.group === group).map(s => s.ranking));
         const highestRanking = Math.max(...scorecards.filter(s => s.group === group).map(s => s.ranking));
