@@ -55,7 +55,7 @@ export class ScoreCardService {
         stationCounter++;
       } else {
         stationCounter = 1;
-        group++;
+        group--;
       }
       s.timerStationId = stationCounter;
     });
