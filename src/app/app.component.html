@@ -17,7 +17,7 @@
         <button class="competition" (click)="handleCompetitionSelected(competitionId)">{{competitionId}}</button>
       </p>
       <p *ngIf="!!competitionsToChooseFrom && competitionsToChooseFrom.length === 0">You don't have any competition available :-(</p>
-      <p>Custom competition: <input type="text" [(ngModel)]="customCompetitionId">&nbsp;
+      <p *ngIf="!!competitionsToChooseFrom">Custom competition: <input type="text" [(ngModel)]="customCompetitionId">&nbsp;
         <button class="competition" (click)="handleCompetitionSelected(customCompetitionId)">Load competitionId</button>
       </p>
     </div>
