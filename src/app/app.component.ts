@@ -14,6 +14,7 @@ export class AppComponent  {
 
   competitionsToChooseFrom: Array<String> = null;
   competitionId: string;
+  customCompetitionId: string;
   config = new GeneralConfiguration();
   wcif: any;
 
