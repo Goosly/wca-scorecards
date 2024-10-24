@@ -12,18 +12,11 @@ export class ScoreCardService {
 
   private readonly SCORE_CARD_RESULT_WIDTH = 145;
 
-  private addEmptyScoreCardsUntilPageIsFull(scorecards: ScoreCardInfo[], roundNumber: number, wcif: any) {
-    const incrementWith = roundNumber === 0 ? 0 : 1;
-    while ((scorecards.length + incrementWith) % 4 !== 0) {
-      scorecards.push(this.getEmptyScoreCard(wcif));
-    }
-  }
-
   public printScoreCardsForRound(wcif: Wcif, event: Event, roundNumber: number, config: GeneralConfiguration) {
     let scorecards: ScoreCardInfo[] = [];
     const round: Round = event.rounds[roundNumber];
     if (roundNumber !== 0) {
-      this.enrichWithRankingFromPreviousRound(round.results, roundNumber - 1, wcif, event);
+      this.enrichWithRankingFromPreviousRound(round.results, roundNumber - 1, event);
       this.sortByRankingFromPreviousRound(round.results);
     }
     round.results.forEach((r, i) => {
@@ -43,8 +36,15 @@ export class ScoreCardService {
     if (config.printStationNumbers) {
       this.enrichWithStationNumbers(scorecards);
     }
-    this.addEmptyScoreCardsUntilPageIsFull(scorecards, roundNumber, wcif);
-    this.print(wcif, scorecards, roundNumber !== 0);
+    if (roundNumber !== 0) {
+      scorecards = [this.summary()].concat(scorecards);
+    }
+    if (config.printInStacks) {
+      scorecards = this.reorderScorecardsInStacks(scorecards, wcif);
+    } else {
+      this.addEmptyScoreCardsUntilPageIsFull(scorecards, wcif);
+    }
+    this.print(wcif, scorecards);
   }
 
   private enrichWithStationNumbers(scorecardsForEvent: ScoreCardInfo[]) {
@@ -61,9 +61,10 @@ export class ScoreCardService {
     });
   }
 
-  private enrichWithRankingFromPreviousRound(results: Result[], previousRoundNumber: number, wcif: Wcif, event: Event) {
-    results.forEach((r: Result) => {
-      r['rankingPreviousRound'] = event.rounds[previousRoundNumber].results.filter(pr => pr.personId === r.personId)[0].ranking;
+  private enrichWithRankingFromPreviousRound(results: Result[], previousRoundNumber: number, event: Event) {
+    results.forEach((result: Result) => {
+      result['rankingPreviousRound'] = event.rounds[previousRoundNumber].results
+        .filter(previousResult => previousResult.personId === result.personId)[0].ranking;
     });
   }
 
@@ -73,6 +74,7 @@ export class ScoreCardService {
 
   private getScoreCardForEvent(wcif: any, event: Event, roundNumber: number): ScoreCardInfo {
     return {
+      isSummary: false,
       eventId: event.id,
       competitionName: wcif.name,
       eventName: getEventName(event.id),
@@ -122,11 +124,18 @@ export class ScoreCardService {
       this.getEmptyScoreCard(wcif),
       this.getEmptyScoreCard(wcif)
     ];
-    pdfMake.createPdf(this.document(scorecards, false)).download('emptyScorecards-' + wcif.id + '.pdf');
+    pdfMake.createPdf(this.document(scorecards)).download('emptyScorecards-' + wcif.id + '.pdf');
+  }
+
+  private summary(): ScoreCardInfo {
+    return {
+      isSummary: true
+    };
   }
 
   private getEmptyScoreCard(wcif): ScoreCardInfo {
     return {
+      isSummary: false,
       eventId: ' ',
       competitionName: wcif.name,
       eventName: ' ',
@@ -143,15 +152,15 @@ export class ScoreCardService {
     };
   }
 
-  private print(wcif: any, scorecards: ScoreCardInfo[], withSummary: boolean) {
+  private print(wcif: any, scorecards: ScoreCardInfo[]) {
     if (scorecards.length === 0) {
       alert('Something went wrong: trying to print zero scorecards');
     } else {
-      pdfMake.createPdf(this.document(scorecards, withSummary)).download('scorecards-' + wcif.id + '.pdf');
+      pdfMake.createPdf(this.document(scorecards)).download('scorecards-' + wcif.id + '.pdf');
     }
   }
 
-  private document(scorecards, withSummary: boolean): any {
+  private document(scorecards): any {
     const document = {
       content: [
 
@@ -162,10 +171,11 @@ export class ScoreCardService {
         fontSize: 12
       }
     };
-    for (let i = withSummary ? -1 : 0; i < scorecards.length; i += 4) {
+    for (let i = 0; i < scorecards.length; i += 4) {
       const onePage = [
         [
-          {stack: i === -1 ? this.getSummary(scorecards) : this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
+          {stack: scorecards[i].isSummary ? this.getSummary(scorecards)
+              : this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
           {text: '', border: [false, false, false, false]},
           {text: '', border: [true, false, false, false]},
           {stack: this.getScoreCardTemplate(scorecards[i + 1]), border: [false, false, false, false]}
@@ -207,9 +217,9 @@ export class ScoreCardService {
   }
 
   private getScoreCardTemplate(info: ScoreCardInfo) {
-    if ('333mbf' === info.eventId) {
+    if ('333mbf' === info?.eventId) {
       return this.oneMbldScoreCard(info);
-    } else if (['666', '777', '333bf', '444bf', '555bf'].includes(info.eventId)) {
+    } else if (['666', '777', '333bf', '444bf', '555bf'].includes(info?.eventId)) {
       return this.oneMo3ScoreCard(info);
     }
     return this.oneAvg5ScoreCard(info);
@@ -391,15 +401,15 @@ export class ScoreCardService {
   }
 
   private getSummary(scorecards: ScoreCardInfo[]) {
-    const eventName = scorecards[0]?.eventName;
-    const round = scorecards[0]?.round;
-    const groups = new Set(scorecards.map(s => s.group));
+    const eventName = scorecards[1]?.eventName;
+    const round = scorecards[1]?.round;
+    const groups = new Set(scorecards.map(s => s?.group));
 
     let list = '';
     [...groups].sort().forEach(group => {
       if (!!group) {
-        const lowestRanking = Math.min(...scorecards.filter(s => s.group === group).map(s => s.ranking));
-        const highestRanking = Math.max(...scorecards.filter(s => s.group === group).map(s => s.ranking));
+        const lowestRanking = Math.min(...scorecards.filter(s => s?.group === group).map(s => s.ranking));
+        const highestRanking = Math.max(...scorecards.filter(s => s?.group === group).map(s => s.ranking));
         list += `Group ${group}: ranking ${lowestRanking} to ${highestRanking}\n`;
       }
     });
@@ -416,20 +426,61 @@ export class ScoreCardService {
       }
     ];
   }
+
+  private addEmptyScoreCardsUntilPageIsFull(scorecards: ScoreCardInfo[], wcif: any) {
+    while (scorecards.length % 4 !== 0) {
+      scorecards.push(this.getEmptyScoreCard(wcif));
+    }
+  }
+
+  private reorderScorecardsInStacks(scorecards: ScoreCardInfo[], wcif: Wcif): ScoreCardInfo[] {
+    const copyScorecards = this.copy(scorecards);
+    this.addEmptyScoreCardsUntilPageIsFull(copyScorecards, wcif);
+
+    const stackedScorecards = new Array<ScoreCardInfo>(copyScorecards.length);
+    for (let i = 0; i < copyScorecards.length; i++) {
+      const indexToPlace = this.getIndexToPlace(i, copyScorecards.length);
+      stackedScorecards[indexToPlace] = copyScorecards[i];
+    }
+
+    return stackedScorecards;
+  }
+
+  private copy(scorecards: ScoreCardInfo[]) {
+    const copyScorecards = [];
+    for (let i = 0; i < scorecards.length; i++) {
+      copyScorecards.push({...scorecards[i]});
+    }
+    return copyScorecards;
+  }
+
+  getIndexToPlace(i: number, length: number) {
+    if (i < length * 0.25) {
+      return i * 4;
+    } else if (i < length * 0.5) {
+      return (i * 4 + 1) % length;
+    } else if (i < length * 0.75) {
+      return (i * 4 + 2) % length;
+    } else {
+      return (i * 4 + 3) % length;
+    }
+  }
+
 }
 
 export class ScoreCardInfo {
-  eventId: string;
-  competitionName: string;
-  eventName: string;
-  round: number;
-  group: number;
-  totalGroups: number;
-  competitorId: number;
-  competitorName: string;
-  timeLimit: string;
-  cumulative: boolean;
-  cutoff: string;
-  ranking: number;
-  timerStationId: number;
+  isSummary: boolean;
+  eventId?: string;
+  competitionName?: string;
+  eventName?: string;
+  round?: number;
+  group?: number;
+  totalGroups?: number;
+  competitorId?: number;
+  competitorName?: string;
+  timeLimit?: string;
+  cumulative?: boolean;
+  cutoff?: string;
+  ranking?: number;
+  timerStationId?: number;
 }
