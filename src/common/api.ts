@@ -44,12 +44,38 @@ export class ApiService {
   }
 
   getWcif(competitionId): Observable<any> {
-    if (environment.testMode) {
-      return this.httpClient.get(`https://www.worldcubeassociation.org/api/v0/competitions/WommelgemOpen2023/wcif/public`,
-        {headers: this.headerParams});
+    return this.httpClient.post(`${environment.wcaUrl}/api/v0/wcif/graphql`,
+      JSON.stringify({ query: `{
+  competition(id: "${competitionId}") {
+        formatVersion
+        id
+        name
+        events {
+            id
+            rounds {
+                format
+                id
+                cutoff {
+                    attemptResult
+                    numberOfAttempts
+                }
+                results {
+                    ranking
+                    personId
+                }
+                timeLimit {
+                    centiseconds
+                }
+            }
+        }
+        persons {
+            name
+            registrantId
+            wcaId
+        }
     }
-
-    return this.httpClient.get(`${environment.wcaUrl}/api/v0/competitions/${competitionId}/wcif`,
+}
+`}),
       {headers: this.headerParams});
   }
 
