@@ -54,8 +54,8 @@ export class AppComponent  {
   }
 
   private loadWcif() {
-    this.apiService.getWcif(this.competitionId).subscribe(wcif => {
-      this.wcif = wcif;
+    this.apiService.getWcif(this.competitionId).subscribe(response => {
+      this.wcif = response.data.competition;
       try {
         this.wcif.events = this.wcif.events.filter(e => e.id !== '333fm');
 
