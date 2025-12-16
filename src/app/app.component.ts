@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
-import { ApiService } from '../common/api';
-import { ScoreCardService } from '../common/scorecard';
+import {Component} from '@angular/core';
+import {ApiService} from '../common/api';
+import {ScoreCardService} from '../common/scorecard';
 import {getEventName} from '@wca/helpers';
 import {GeneralConfiguration} from '../common/classes';
+import {environment} from '../environments/environment';
 
 @Component({
   selector: 'my-app',
   templateUrl: './app.component.html',
+  standalone: false,
   styleUrls: [ './app.component.css' ]
 })
 export class AppComponent  {
@@ -72,6 +74,10 @@ export class AppComponent  {
         this.competitionId = null;
       }
     });
+  }
+
+  version() {
+    return environment.version;
   }
 
 }
