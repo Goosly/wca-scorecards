@@ -124,7 +124,7 @@ export class ScoreCardService {
       this.getEmptyScoreCard(wcif),
       this.getEmptyScoreCard(wcif)
     ];
-    pdfMake.createPdf(this.document(scorecards)).download('emptyScorecards-' + wcif.id + '.pdf');
+    pdfMake.createPdf(this.document(wcif, scorecards)).download('emptyScorecards-' + wcif.id + '.pdf');
   }
 
   private summary(): ScoreCardInfo {
@@ -156,11 +156,11 @@ export class ScoreCardService {
     if (scorecards.length === 0) {
       alert('Something went wrong: trying to print zero scorecards');
     } else {
-      pdfMake.createPdf(this.document(scorecards)).download('scorecards-' + wcif.id + '.pdf');
+      pdfMake.createPdf(this.document(wcif, scorecards)).download('scorecards-' + wcif.id + '.pdf');
     }
   }
 
-  private document(scorecards): any {
+  private document(wcif: any, scorecards): any {
     const document = {
       content: [
 
@@ -175,10 +175,10 @@ export class ScoreCardService {
       const onePage = [
         [
           {stack: scorecards[i].isSummary ? this.getSummary(scorecards)
-              : this.getScoreCardTemplate(scorecards[i]), border: [false, false, false, false]},
+              : this.getScoreCardTemplate(wcif, scorecards[i]), border: [false, false, false, false]},
           {text: '', border: [false, false, false, false]},
           {text: '', border: [true, false, false, false]},
-          {stack: this.getScoreCardTemplate(scorecards[i + 1]), border: [false, false, false, false]}
+          {stack: this.getScoreCardTemplate(wcif, scorecards[i + 1]), border: [false, false, false, false]}
         ],
         [
           {text: '', border: [false, true, false, false]},
@@ -187,10 +187,10 @@ export class ScoreCardService {
           {text: '', border: [false, true, false, false]}
         ],
         [
-          {stack: this.getScoreCardTemplate(scorecards[i + 2]), border: [false, false, false, false]},
+          {stack: this.getScoreCardTemplate(wcif, scorecards[i + 2]), border: [false, false, false, false]},
           {text: '', border: [false, false, false, false]},
           {text: '', border: [true, false, false, false]},
-          {stack: this.getScoreCardTemplate(scorecards[i + 3]), border: [false, false, false, false]}
+          {stack: this.getScoreCardTemplate(wcif, scorecards[i + 3]), border: [false, false, false, false]}
         ]
       ];
       const page = {
@@ -216,10 +216,13 @@ export class ScoreCardService {
     return document;
   }
 
-  private getScoreCardTemplate(info: ScoreCardInfo) {
+  private getScoreCardTemplate(wcif: any, info: ScoreCardInfo) {
     if ('333mbf' === info?.eventId) {
       return this.oneMbldScoreCard(info);
-    } else if (['666', '777', '333bf', '444bf', '555bf'].includes(info?.eventId)) {
+    } else if ('333bf' === info.eventId && wcif.schedule?.startDate?.includes('2025')) {
+      // Todo cleanup after 2025 competitions
+      return this.oneMo3ScoreCard(info);
+    } else if (['666', '777', '444bf', '555bf'].includes(info.eventId)) {
       return this.oneMo3ScoreCard(info);
     }
     return this.oneAvg5ScoreCard(info);
